@@ -26,6 +26,23 @@ app.get("/vehiculos", async (req, res) => {
   }
 });
 
+// GET por placa (Búsqueda específica)
+app.get("/vehiculos/:placa", async (req, res) => {
+  const { placa } = req.params; // Obtener la placa de la URL
+
+  try {
+    const [rows] = await pool.query("SELECT * FROM vehiculos WHERE placa = ?", [placa]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Vehículo no encontrado" });
+    }
+    
+    res.status(200).json(rows[0]); // Devolver el primer vehículo encontrado
+  } catch (error) {
+    handDbError(res, error);
+  }
+});
+
 // POST    (Inserción) //
 app.post("/vehiculos", async (req, res) => {
   const { marca, modelo, color, precio, placa } = req.body;
@@ -82,6 +99,7 @@ app.put("/vehiculos/:id", async (req, res) => {
     handDbError(res, error);
   }
 });
+
 // DELETE  (Eliminación) //
 app.delete("/vehiculos/:id", async (req, res) => {
   const {id} = req.params; //URL
